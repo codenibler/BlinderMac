@@ -38,7 +38,7 @@ struct ContentView: View {
                 ZStack(alignment: .leading) {
                     Text("Blinder Off")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.tertiary)
                         .opacity(appState.status == .idle ? 1 : 0)
                     
                     Text("Blinder On")

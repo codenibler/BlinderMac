@@ -26,6 +26,13 @@ struct BlinderMacApp: App {
         // Main window, with Menu Bar Icon.
             MenuBarExtra(isInserted: .constant(true)) {
                 ContentView()
+                    .background(
+                            WindowConfigurator { w in
+                                w.isOpaque = false
+                                w.backgroundColor = .clear
+                                w.titlebarAppearsTransparent = true
+                            }
+                        )
                     .environmentObject(appState)
             } label: {
                 switch appState.status {
@@ -52,6 +59,7 @@ struct BlinderMacApp: App {
                         .background(.thinMaterial)
                 }
                 .windowResizability(.contentSize)
+                .windowToolbarStyle(.unifiedCompact)
                 .handlesExternalEvents(matching: ["new-mode"])
     }
 }

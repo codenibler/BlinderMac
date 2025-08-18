@@ -75,6 +75,10 @@ struct NewModeWizardView: View {
             }
         }
         .padding(16)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .toolbar(.visible, for: .windowToolbar)
+        .toolbarBackground(.visible, for: .windowToolbar)
+        .toolbarBackground(.thinMaterial, for: .windowToolbar)
         .frame(minWidth: step.title == "Confirm & Name" ? 200 : 400, minHeight:  step.title == "Confirm & Name" ? 0 : 500)
         .background(
                 WindowConfigurator { w in
@@ -92,8 +96,7 @@ struct NewModeWizardView: View {
         case .apps:
             return !draft.selectedAppBundleIDs.isEmpty
         case .websites:
-            // allow empty if you want; here we require at least 1 domain
-            return !draft.blockedDomains.isEmpty
+            return true
         case .confirm:
             return !draft.modeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
@@ -306,6 +309,10 @@ struct ConfirmAndNameStep: View {
                 .padding(8)
                 .frame(maxWidth: .infinity)
             }
+            .background(
+                VisualEffectBackground(material: .sidebar)
+                    .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+            )
         }
     }
 }
