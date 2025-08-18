@@ -56,7 +56,8 @@ final class AppCatalog: ObservableObject {
                 if let bundle = Bundle(url: obj),
                    // Grab bundleID
                    let bid = bundle.bundleIdentifier,
-                   bid != mainBundleID {
+                   bid != mainBundleID,
+                !bid.hasPrefix("com.apple.") {
                     // Grab app name
                     let name = (bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String)
                     ?? (bundle.object(forInfoDictionaryKey: "CFBundleName") as? String)
