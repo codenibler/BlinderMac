@@ -7,9 +7,9 @@ struct ContentView: View {
     @State private var modes: [String] = ["Test"]
     @State private var selectedMode: String? = nil
     @EnvironmentObject var appState: AppState
-
-    // Which page is the app currently on?
-    @State private var activeSheet: ActiveSheet? = nil
+    
+    // Ability to open new windows.
+    @Environment(\.openWindow) private var openWindow
     
     // Create a new Focus mode sheet
     @State private var showingNewModeSheet = false
@@ -66,12 +66,20 @@ struct ContentView: View {
                     
                     Text("Create New…")
                         .frame(maxWidth: 5)
+                        .tag("New-mode")
                 }
                 .pickerStyle(.menu)
                 .frame(maxWidth: 160, alignment: .trailing)
                 .allowsHitTesting(appState.status == .idle)
-                .opacity(appState.status == .idle ? 1 : 0)   
+                .opacity(appState.status == .idle ? 1 : 0)
                 .animation(.easeInOut(duration: 0.3), value: appState.status)
+                .onChange(of: selectedMode) { value in
+                    guard let value else { return }
+                    if value == "New-mode" {
+                        openWindow(id: "new-mode")
+                        selectedMode = nil
+                    }
+                }
             }
             // Force HStack to left.
             .frame(maxWidth: .infinity, alignment: .leading)
