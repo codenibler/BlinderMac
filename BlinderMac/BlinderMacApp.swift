@@ -9,9 +9,17 @@ final class AppState: ObservableObject {
     @Published var progress: Double = 0
 }
 
+// Prevents entire app from shutting down when one tab is closed.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
+    }
+}
+
 // Main app.
 @main
 struct BlinderMacApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
     
     var body: some Scene {
