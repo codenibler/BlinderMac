@@ -46,7 +46,7 @@ struct BlinderMacApp: App {
             .menuBarExtraStyle(.window)
         
         // Separate window for creating a new mode.
-        Window("New Focus Mode", id: "new-mode") {
+        Window("", id: "new-mode") {
                     NewModeWizardView()
                         .environmentObject(appState)
                         .background(.thinMaterial)

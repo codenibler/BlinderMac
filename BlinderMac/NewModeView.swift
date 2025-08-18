@@ -76,7 +76,13 @@ struct NewModeWizardView: View {
         }
         .padding(16)
         .frame(minWidth: step.title == "Confirm & Name" ? 200 : 400, minHeight:  step.title == "Confirm & Name" ? 0 : 500)
-        .background(.thinMaterial)
+        .background(
+                WindowConfigurator { w in
+                    w.isOpaque = false
+                    w.backgroundColor = .clear
+                    w.titlebarAppearsTransparent = true
+                }
+            )
     }
 
     // MARK: - Navigation rules
@@ -165,13 +171,20 @@ struct BlockedAppsStep: View {
                     AppRow(
                         app: app,
                         isSelected: draft.selectedAppBundleIDs.contains(app.bundleID),
-                        toggle: {
-                            toggle(app.bundleID)
-                        }
+                        toggle: { toggle(app.bundleID) }
                     )
                 }
             }
             .listStyle(.inset)
+            .scrollContentBackground(.hidden)
+            .background(
+                VisualEffectBackground(material: .sidebar) // or .popover
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+            )
             .searchable(text: $catalog.search, placement: .toolbar, prompt: "Search apps or bundle IDs")
             .onAppear { catalog.loadIfNeeded() }
         }
@@ -224,8 +237,17 @@ struct BlockedWebsitesStep: View {
                 }
             }
             .listStyle(.inset)
-
-            Text("Tip: Domains are matched by suffix (e.g., blocking twitter.com also blocks subdomains).")
+            .scrollContentBackground(.hidden)
+            .background(
+                VisualEffectBackground(material: .sidebar)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+            )
+            
+            Text("Domains are matched by suffix (Blocking youtube.com also blocks all of YouTube's subdomains).")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -325,4 +347,29 @@ private struct AppRow: View {
         .padding(.vertical, 2)
         .help(app.url.path)
     }
+}
+
+// 2 helper functions to make the 3 windows translucent like the menu bar.
+struct WindowConfigurator: NSViewRepresentable {
+    let configure: (NSWindow) -> Void
+    func makeNSView(context: Context) -> NSView { NSView() }
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async {
+            if let win = nsView.window { configure(win) }
+        }
+    }
+}
+struct VisualEffectBackground: NSViewRepresentable {
+    var material: NSVisualEffectView.Material = .popover
+    var blending: NSVisualEffectView.BlendingMode = .behindWindow
+    var state: NSVisualEffectView.State = .active
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let v = NSVisualEffectView()
+        v.material = material
+        v.blendingMode = blending
+        v.state = state
+        return v
+    }
+    func updateNSView(_ v: NSVisualEffectView, context: Context) {}
 }
