@@ -295,23 +295,20 @@ struct ConfirmAndNameStep: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(height: 36)
             }
-            
-            GroupBox {
-                HStack {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Summary")
-                            .font(.headline)
-                        Text("Apps blocked: \(draft.selectedAppBundleIDs.count)")
-                        Text("Websites blocked: \(draft.blockedDomains.count)")
-                    }
-                    Spacer()
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Summary")
+                        .font(.headline)
+                    Text("Apps blocked: \(draft.selectedAppBundleIDs.count)")
+                    Text("Websites blocked: \(draft.blockedDomains.count)")
                 }
-                .padding(8)
-                .frame(maxWidth: .infinity)
+                Spacer()
             }
+            .padding(16)
+            .frame(maxWidth: .infinity)
             .background(
                 VisualEffectBackground(material: .sidebar)
-                    .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             )
         }
     }
