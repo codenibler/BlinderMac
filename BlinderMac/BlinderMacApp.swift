@@ -64,5 +64,10 @@ struct BlinderMacApp: App {
                 .windowResizability(.contentSize)
                 .windowToolbarStyle(.unifiedCompact)
                 .handlesExternalEvents(matching: ["new-mode"])
+        Window("Edit Focus", id: "edit-mode") {
+            EditModeView()              
+                .environmentObject(appState)
+                .environmentObject(focusModel)
+        }
     }
 }

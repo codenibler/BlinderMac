@@ -62,6 +62,7 @@ final class FocusStore {
 final class FocusConfigModel: ObservableObject {
     @Published var modes: [FocusMode]
     @Published var selectedModeID: UUID?
+    @Published var editingModeID: UUID? = nil
 
     private let store = FocusStore()
 

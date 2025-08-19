@@ -141,33 +141,51 @@ struct ContentView: View {
                 Spacer()
                 
                 // Start button
+                HStack {
                 VStack {
                     Spacer()
-                    
-                    Button(action: {
-                        if appState.status == .running {
-                            stopFocus()   // stop
-                        } else {
-                            startFocus()  // start
+                        if let id = focusModel.selectedModeID,
+                           let mode = focusModel.modes.first(where: { $0.id == id }) {
+                            Button {
+                                focusModel.editingModeID = id
+                                openWindow(id: "edit-mode")
+                            } label: {
+                                Text("Edit “\(mode.name)”")
+                            }
+                            .keyboardShortcut(.defaultAction)
+                            .font(.system(size: 14, weight: .regular))
+                            .buttonStyle(.borderedProminent)
+                            .opacity(appState.status == .running ? 0.0 : 1)
+                            .tint(.gray)
+                            .controlSize(.large)
+                            .disabled(focusModel.selectedModeID == nil || appState.status == .running )}
+                        
+                        Button(action: {
+                            if appState.status == .running {
+                                stopFocus()   // stop
+                            } else {
+                                startFocus()  // start
+                            }
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: appState.status == .running ? "stop.fill" : "play.fill")
+                                Text(appState.status == .running ? "Stop Focus" : "Start Focus")
+                            }
+                            .font(.system(size: 14, weight: .regular))
                         }
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: appState.status == .running ? "stop.fill" : "play.fill")
-                            Text(appState.status == .running ? "Stop Focus" : "Start Focus")
-                        }
-                        .font(.system(size: 14, weight: .regular))
+                        .keyboardShortcut(.defaultAction)
+                        .buttonStyle(.borderedProminent)
+                        .tint(appState.status == .running ? .red : .accentColor)
+                        .controlSize(.large)
+                        .disabled(focusModel.selectedModeID == nil)
                     }
-                    .keyboardShortcut(.defaultAction)
-                    .buttonStyle(.borderedProminent)
-                    .tint(appState.status == .running ? .red : .accentColor)
-                    .opacity(0.7)
-                    .controlSize(.large)
-                    .disabled(focusModel.selectedModeID == nil)
                 }
+                .frame(maxWidth: 150)
+
             }
         }
         .padding(16)
-        .frame(width: 440, height: 180)
+        .frame(width: 440, height: 160)
     }
 
     // MARK: - Actions
