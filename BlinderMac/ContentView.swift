@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var modes: [String] = ["Test"]
     @State private var selectedMode: String? = nil
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var focusModel: FocusConfigModel
     
     // Ability to open new windows.
     @Environment(\.openWindow) private var openWindow
@@ -14,8 +15,7 @@ struct ContentView: View {
     // Create a new Focus mode sheet
     @State private var showingNewModeSheet = false
     @State private var newModeName: String = ""
-    private let createTag = "__create_new__"
-    
+
     // Duration input. To display duration in 00:00 format, secs are needed.
     // Duration setup: Total seconds, remaining seconds, and timer task active/not.
     @State private var durationSeconds: Int = 50 * 60
@@ -50,23 +50,22 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                Picker("", selection: $selectedMode) {
+                Picker("", selection: $focusModel.selectedModeID) {
                     Text("Select Focus Mode")
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .tag(nil as String?)
-                    
-                    ForEach(modes, id: \.self) { mode in
-                        Text(mode)
-                            .tag(Optional(mode))
+                        .tag(Optional<UUID>.none)
+                    ForEach(focusModel.modes) { mode in
+                        Text(mode.name)
+                            .tag(Optional(mode.id))
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
                     Divider()
                     
                     Text("Create New…")
-                        .frame(maxWidth: 5)
-                        .tag("New-mode")
+                    .frame(maxWidth: 5)
+                    .tag(Optional("New-mode"))
                 }
                 .pickerStyle(.menu)
                 .frame(maxWidth: 160, alignment: .trailing)
@@ -74,12 +73,12 @@ struct ContentView: View {
                 .opacity(appState.status == .idle ? 1 : 0)
                 .animation(.easeInOut(duration: 0.3), value: appState.status)
                 .onChange(of: selectedMode) { value in
-                    guard let value else { return }
-                    if value == "New-mode" {
-                        openWindow(id: "new-mode")
-                        selectedMode = nil
-                    }
-                }
+                                   guard let value else { return }
+                                   if value == "New-mode" {
+                                       openWindow(id: "new-mode")
+                                       selectedMode = nil
+                                   }
+                               }
             }
             // Force HStack to left.
             .frame(maxWidth: .infinity, alignment: .leading)

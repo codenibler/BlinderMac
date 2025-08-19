@@ -25,6 +25,13 @@ struct NewModeWizardView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var draft = NewModeDraft()
     @State private var step: Step = .apps
+    // Allow storing new focus modes.
+    @EnvironmentObject var focusModel: FocusConfigModel
+
+    // Ability to open new windows.
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismiss) private var dismiss
+
 
     var body: some View {
         VStack(spacing: 12) {
@@ -62,7 +69,14 @@ struct NewModeWizardView: View {
                 Spacer()
 
                 if step == .confirm {
-                    Button("Create") { handleCreate() }
+                    Button("Create") {
+                    focusModel.addMode(
+                                named: draft.modeName.trimmingCharacters(in: .whitespacesAndNewlines),
+                                blockedApps: draft.selectedAppBundleIDs,
+                                blockedSites: Set(draft.blockedDomains)
+                            )
+                            dismiss()
+                        }
                         .keyboardShortcut(.defaultAction)
                         .buttonStyle(.borderedProminent)
                         .disabled(draft.modeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -106,7 +120,7 @@ struct NewModeWizardView: View {
         switch step {
         case .apps: step = .websites
         case .websites: step = .confirm
-        case .confirm: break
+        case .confirm: return
         }
     }
 
@@ -116,24 +130,6 @@ struct NewModeWizardView: View {
         case .websites: step = .apps
         case .confirm: step = .websites
         }
-    }
-
-    // MARK: - Persist & Close
-
-    private func handleCreate() {
-        // TODO: Replace with your real persistence
-        // Example: NotificationCenter broadcast
-        // NotificationCenter.default.post(
-        //   name: .didCreateMode,
-        //   object: nil,
-        //   userInfo: [
-        //     "name": draft.modeName,
-        //     "apps": Array(draft.selectedAppBundleIDs),
-        //     "domains": draft.blockedDomains
-        //   ])
-
-        // Close window
-        NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil)
     }
 }
 

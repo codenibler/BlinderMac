@@ -21,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 struct BlinderMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
+    @StateObject private var focusModel = FocusConfigModel()
     
     var body: some Scene {
         // Main window, with Menu Bar Icon.
@@ -34,6 +35,7 @@ struct BlinderMacApp: App {
                             }
                         )
                     .environmentObject(appState)
+                    .environmentObject(focusModel)
             } label: {
                 switch appState.status {
                 // Dynamic icon for focus running and focus missing.
@@ -56,6 +58,7 @@ struct BlinderMacApp: App {
         Window("", id: "new-mode") {
                     NewModeWizardView()
                         .environmentObject(appState)
+                        .environmentObject(focusModel)   
                         .background(.thinMaterial)
                 }
                 .windowResizability(.contentSize)
