@@ -66,7 +66,6 @@ final class FocusConfigModel: ObservableObject {
     private let store = FocusStore()
 
     init() {
-        // FOR NOW, DO NOT INITIALIZE WITH JSON FILES FROM MEMORY. TEST
         let snap = store.load()
         modes = snap.modes
         selectedModeID = snap.selectedModeID
@@ -81,8 +80,7 @@ final class FocusConfigModel: ObservableObject {
                              blockedSites: blockedSites)
         modes.append(mode)
         selectedModeID = mode.id
-        // FOR NOW, we do not wish to persist.
-        //persist()
+        persist()
     }
 
     func persist() {

@@ -50,14 +50,14 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                Picker("", selection: $focusModel.selectedModeID) {
+                Picker("", selection: $selectedMode) {
                     Text("Select Focus Mode")
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .tag(Optional<UUID>.none)
+                        .tag(Optional<String>.none)
                     ForEach(focusModel.modes) { mode in
                         Text(mode.name)
-                            .tag(Optional(mode.id))
+                            .tag(Optional(mode.id.uuidString))
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
@@ -73,12 +73,22 @@ struct ContentView: View {
                 .opacity(appState.status == .idle ? 1 : 0)
                 .animation(.easeInOut(duration: 0.3), value: appState.status)
                 .onChange(of: selectedMode) { value in
-                                   guard let value else { return }
-                                   if value == "New-mode" {
-                                       openWindow(id: "new-mode")
-                                       selectedMode = nil
-                                   }
-                               }
+                    guard let value else { return }
+                    if value == "New-mode" {
+                        openWindow(id: "new-mode")
+                        selectedMode = nil
+                    } else if let id = UUID(uuidString: value) {
+                        focusModel.selectedModeID = id
+                    }
+                }
+                .onAppear {
+                    if let id = focusModel.selectedModeID {
+                        selectedMode = id.uuidString
+                    }
+                }
+                .onChange(of: focusModel.selectedModeID) { id in
+                    selectedMode = id?.uuidString
+                }
             }
             // Force HStack to left.
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -152,7 +162,7 @@ struct ContentView: View {
                     .tint(appState.status == .running ? .red : .accentColor)
                     .opacity(0.7)
                     .controlSize(.large)
-                    .disabled(selectedMode == nil)
+                    .disabled(focusModel.selectedModeID == nil)
                 }
             }
         }
