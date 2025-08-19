@@ -8,9 +8,10 @@ struct AppInfo: Identifiable, Hashable {
     let name: String
     let bundleID: String
     let url: URL
-    let icon: NSImage
+    let icon: NSImage?
 }
 
+@MainActor
 final class AppCatalog: ObservableObject {
     @Published var allApps: [AppInfo] = []
     @Published var search: String = ""

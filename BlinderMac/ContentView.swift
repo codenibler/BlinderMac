@@ -54,7 +54,8 @@ struct ContentView: View {
                     Text("Select Focus Mode")
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .tag(Optional<String>.none)
+                        .tag(nil as String?)
+
                     ForEach(focusModel.modes) { mode in
                         Text(mode.name)
                             .tag(Optional(mode.id.uuidString))
@@ -155,10 +156,10 @@ struct ContentView: View {
                             .keyboardShortcut(.defaultAction)
                             .font(.system(size: 14, weight: .regular))
                             .buttonStyle(.borderedProminent)
-                            .opacity(appState.status == .running ? 0.0 : 1)
+                            .opacity((appState.status == .running || selectedMode == nil) ? 0.0 : 1.0)
                             .tint(.gray)
                             .controlSize(.large)
-                            .disabled(focusModel.selectedModeID == nil || appState.status == .running )}
+                            .disabled(focusModel.selectedModeID == nil || appState.status == .running || selectedMode == "placeholder")}
                         
                         Button(action: {
                             if appState.status == .running {

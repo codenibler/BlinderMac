@@ -27,13 +27,7 @@ struct BlinderMacApp: App {
         // Main window, with Menu Bar Icon.
             MenuBarExtra(isInserted: .constant(true)) {
                 ContentView()
-                    .background(
-                            WindowConfigurator { w in
-                                w.isOpaque = false
-                                w.backgroundColor = .clear
-                                w.titlebarAppearsTransparent = true
-                            }
-                        )
+                    .background(.thinMaterial)
                     .environmentObject(appState)
                     .environmentObject(focusModel)
             } label: {
@@ -64,10 +58,14 @@ struct BlinderMacApp: App {
                 .windowResizability(.contentSize)
                 .windowToolbarStyle(.unifiedCompact)
                 .handlesExternalEvents(matching: ["new-mode"])
-        Window("Edit Focus", id: "edit-mode") {
+        
+        Window("", id: "edit-mode") {
             EditModeView()              
                 .environmentObject(appState)
                 .environmentObject(focusModel)
+                .background(.thinMaterial)
         }
+        .windowResizability(.contentSize)
+        .windowToolbarStyle(.unifiedCompact)
     }
 }

@@ -309,45 +309,6 @@ struct ConfirmAndNameStep: View {
         }
     }
 }
-// MARK: - Shared Row
-
-private struct AppRow: View {
-    let app: AppInfo
-    let isSelected: Bool
-    let toggle: () -> Void
-
-    var body: some View {
-        Button(action: toggle) {
-            HStack(spacing: 10) {
-                Image(nsImage: app.icon)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(app.name)
-                        .font(.system(size: 13, weight: .medium))
-                        .lineLimit(1)
-                    Text(app.bundleID)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                Spacer()
-
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .imageScale(.medium)
-                    .foregroundStyle(isSelected ? .primary : .secondary)
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .padding(.vertical, 2)
-        .help(app.url.path)
-    }
-}
 
 // 2 helper functions to make the 3 windows translucent like the menu bar.
 struct WindowConfigurator: NSViewRepresentable {

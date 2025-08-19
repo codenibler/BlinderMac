@@ -5,9 +5,8 @@ import SwiftUI
 struct FocusMode: Identifiable, Codable, Equatable {
     let id: UUID
     var name: String
-    var blockedApps: Set<String>         // bundle IDs, e.g. "com.apple.Safari"
-    var blockedSites: Set<String>        // domains/URL patterns
-    // add more: schedules, timers, notes, etc.
+    var blockedApps: Set<String>
+    var blockedSites: Set<String>
 
     init(id: UUID = UUID(),
          name: String,
@@ -26,14 +25,18 @@ struct FocusSnapshot: Codable {
     var selectedModeID: UUID?
 }
 
-// MARK: - JSON store (same idea as before, now saving full modes)
+// MARK: - JSON store
 final class FocusStore {
     private let fm = FileManager.default
     private let filename = "FocusConfig.json"
 
     private var url: URL {
-        let appSupport = try! fm.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        let dir = appSupport.appendingPathComponent(Bundle.main.bundleIdentifier ?? "Blinder", isDirectory: true)
+        let appSupport = try! fm.url(for: .applicationSupportDirectory,
+                                     in: .userDomainMask,
+                                     appropriateFor: nil,
+                                     create: true)
+        let dir = appSupport.appendingPathComponent(Bundle.main.bundleIdentifier ?? "Blinder",
+                                                    isDirectory: true)
         if !fm.fileExists(atPath: dir.path) {
             try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         }
@@ -56,13 +59,17 @@ final class FocusStore {
             print("FocusStore save error:", error)
         }
     }
+
+    func deleteFile() {
+        try? fm.removeItem(at: url)
+    }
 }
 
-
+// MARK: - Main model
 final class FocusConfigModel: ObservableObject {
     @Published var modes: [FocusMode]
     @Published var selectedModeID: UUID?
-    @Published var editingModeID: UUID? = nil
+    @Published var editingModeID: UUID? = nil   // to track current edit target
 
     private let store = FocusStore()
 
@@ -70,7 +77,6 @@ final class FocusConfigModel: ObservableObject {
         let snap = store.load()
         modes = snap.modes
         selectedModeID = snap.selectedModeID
-        
     }
 
     func addMode(named name: String,
@@ -81,6 +87,23 @@ final class FocusConfigModel: ObservableObject {
                              blockedSites: blockedSites)
         modes.append(mode)
         selectedModeID = mode.id
+        persist()
+    }
+
+    func renameMode(id: UUID, to newName: String) {
+        guard let idx = modes.firstIndex(where: { $0.id == id }) else { return }
+        modes[idx].name = newName
+        persist()
+    }
+
+    func deleteMode(id: UUID) {
+        modes.removeAll { $0.id == id }
+        if selectedModeID == id {
+            selectedModeID = modes.first?.id
+        }
+        if editingModeID == id {
+            editingModeID = nil
+        }
         persist()
     }
 
