@@ -137,6 +137,8 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* End PBXSourcesBuildPhase section */
+
 /* Begin XCBuildConfiguration section */
 		0B327F852E537269000ACE87 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -261,8 +263,10 @@
 		0B327F882E537269000ACE87 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "`";
+				ASSETCATALOG_COMPILER_APPICON_NAME = V1;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = BlinderMac/BlinderMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -290,8 +294,10 @@
 		0B327F892E537269000ACE87 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "`";
+				ASSETCATALOG_COMPILER_APPICON_NAME = V1;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = BlinderMac/BlinderMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

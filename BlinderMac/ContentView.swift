@@ -11,6 +11,7 @@ struct ContentView: View {
     
     // Ability to open new windows.
     @Environment(\.openWindow) private var openWindow
+    @StateObject private var engine = FocusEngine()
     
     // Create a new Focus mode sheet
     @State private var showingNewModeSheet = false
@@ -191,6 +192,10 @@ struct ContentView: View {
 
     // MARK: - Actions
     private func startFocus() {
+        if let id = focusModel.selectedModeID,
+               let mode = focusModel.modes.first(where: { $0.id == id }) {
+                engine.start(mode: mode)
+            }
         // Set timer with seconds indicated by user.
         remainingSeconds = durationSeconds
         appState.status = .running
@@ -216,6 +221,7 @@ struct ContentView: View {
     }
     
     private func stopFocus() {
+        engine.stop()
         timerTask?.cancel()
         timerTask = nil
         appState.status = .idle

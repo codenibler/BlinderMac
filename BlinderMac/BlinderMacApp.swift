@@ -23,6 +23,10 @@ struct BlinderMacApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var focusModel = FocusConfigModel()
     
+    init() {
+            Notifier.configure()
+        }
+    
     var body: some Scene {
         // Main window, with Menu Bar Icon.
             MenuBarExtra(isInserted: .constant(true)) {
