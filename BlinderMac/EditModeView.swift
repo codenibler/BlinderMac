@@ -13,13 +13,16 @@ struct EditModeView: View {
             VStack(spacing: 16) {
                     LabeledContent("Name") {
                         TextField("Name", text: binding.name)
+                            .font(.system(size: 12, weight: .light))
                             .textFieldStyle(.roundedBorder)
-                            .frame(maxWidth: .infinity) // <-- expand field column
+                            .frame(maxWidth: .infinity)
                     }
+                    .font(.system(size: 14, weight: .regular))
+
                     Section {
                         BlockedAppsEditor(selectedAppBundleIDs: binding.blockedApps)
-                            .frame(minHeight: 140)
-                            .frame(maxWidth: .infinity) // <-- allow full width
+                            .frame(minHeight: 200)
+                            .frame(maxWidth: .infinity) 
                     }
                     Section {
                         BlockedSitesEditor(blockedDomains: binding.blockedSites)
