@@ -167,7 +167,7 @@ struct ContentView: View {
             }
         }
         .padding(16)
-        .frame(width: 400, height: 160)
+        .frame(width: 440, height: 180)
     }
 
     // MARK: - Actions
