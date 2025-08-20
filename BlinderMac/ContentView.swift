@@ -145,6 +145,7 @@ struct ContentView: View {
                 HStack {
                 // Start button
                     VStack (alignment: .trailing) {
+                        Spacer()
                         if let id = focusModel.selectedModeID,
                            let _ = focusModel.modes.first(where: { $0.id == id }) {
                             Button {
@@ -173,7 +174,7 @@ struct ContentView: View {
                                 startFocus()  // start
                             }
                         }) {
-                            HStack(spacing: 8) {
+                            HStack (spacing: 8) {
                                 Image(systemName: appState.status == .running ? "stop.fill" : "play.fill")
                                 Text(appState.status == .running ? "Stop Focus" : "Start Focus")
                             }
