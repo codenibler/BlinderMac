@@ -1,3 +1,4 @@
+// Engine that watches over active apps and terminates them if active.
 import AppKit
 
 @MainActor
@@ -9,16 +10,16 @@ final class FocusEngine: ObservableObject {
     private var blockedApps = Set<String>()
     private var modeName = ""
 
-    // Optional safety allowlist so you don't nuke yourself/Finder/etc.
+    // Just in case we plan to explode ourselves....
     private let allowlist: Set<String> = [
         Bundle.main.bundleIdentifier ?? "",
         "com.apple.finder",
         "com.apple.Terminal"
     ]
 
+    // Called when Start Focus is called, with mode name passed in,.
     func start(mode: FocusMode) {
-        blockedApps = mode.blockedApps.subtracting(allowlist) // never block allowlisted
-        modeName = mode.name
+        blockedApps = mode.blockedApps.subtracting(allowlist) // In case. Don't block allowed apps.
         startAppBlocking()
     }
 
@@ -38,13 +39,13 @@ final class FocusEngine: ObservableObject {
             self?.handleAppEvent(n)
         }
 
-        // Kick off an immediate sweep so already-running background apps get killed now.
+        // Immediatelyn scan all active apps and delete those on block list.
         sweepAllRunning()
 
-        // Keep sweeping periodically (background + frontmost safety belt)
+        // Keep sweeping front and background every second to terminate.
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 700_000_000) // ~0.7s
+                try? await Task.sleep(nanoseconds: 1000_000_000)
                 await self?.sweepAllRunning()
             }
         }
@@ -66,7 +67,7 @@ final class FocusEngine: ObservableObject {
         if shouldBlock(bid) { kill(app) }
     }
 
-    /// Sweep EVERYTHING, not just the frontmost app.
+    // Not only Frontmost app, but delete ALL blocked apps running.
     @MainActor
     private func sweepAllRunning() {
         for app in NSWorkspace.shared.runningApplications {

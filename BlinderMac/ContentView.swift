@@ -70,7 +70,7 @@ struct ContentView: View {
                     .tag(Optional("New-mode"))
                 }
                 .pickerStyle(.menu)
-                .frame(maxWidth: 160, alignment: .trailing)
+                .frame(minWidth: 70, maxWidth: 190)
                 .allowsHitTesting(appState.status == .idle)
                 .opacity(appState.status == .idle ? 1 : 0)
                 .animation(.easeInOut(duration: 0.3), value: appState.status)
@@ -140,21 +140,25 @@ struct ContentView: View {
                         }
                     }
                 }
-                Spacer()
                 
-                // Start button
+                Spacer()
                 HStack {
-                VStack {
-                    Spacer()
+                // Start button
+                    VStack (alignment: .trailing) {
                         if let id = focusModel.selectedModeID,
-                           let mode = focusModel.modes.first(where: { $0.id == id }) {
+                           let _ = focusModel.modes.first(where: { $0.id == id }) {
                             Button {
                                 focusModel.editingModeID = id
                                 openWindow(id: "edit-mode")
                             } label: {
-                                Text("Edit “\(mode.name)”")
+                                HStack(spacing: 8) {
+                                    Image(systemName: "pencil")
+                                    Text("Edit Focus")
+                                }
+                                .font(.system(size: 14, weight: .regular))
                             }
                             .keyboardShortcut(.defaultAction)
+                            .frame(alignment: .trailing)
                             .font(.system(size: 14, weight: .regular))
                             .buttonStyle(.borderedProminent)
                             .opacity((appState.status == .running || selectedMode == nil) ? 0.0 : 1.0)
@@ -177,13 +181,14 @@ struct ContentView: View {
                         }
                         .keyboardShortcut(.defaultAction)
                         .buttonStyle(.borderedProminent)
+                        .frame(alignment: .trailing)
                         .tint(appState.status == .running ? .red : .accentColor)
                         .controlSize(.large)
                         .disabled(focusModel.selectedModeID == nil)
                     }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                .frame(maxWidth: 150)
-
+                .frame(maxWidth: .infinity)
             }
         }
         .padding(16)
