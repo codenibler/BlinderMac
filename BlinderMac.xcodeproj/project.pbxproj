@@ -137,8 +137,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* End PBXSourcesBuildPhase section */
-
 /* Begin XCBuildConfiguration section */
 		0B327F852E537269000ACE87 /* Debug */ = {
 			isa = XCBuildConfiguration;

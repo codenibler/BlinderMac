@@ -1,40 +1,51 @@
 import AppKit
 
+@MainActor
 final class FocusEngine: ObservableObject {
     private var appLaunchObserver: Any?
     private var appActivateObserver: Any?
     private var pollTask: Task<Void, Never>?
 
     private var blockedApps = Set<String>()
-    private var blockedSites = Set<String>()
     private var modeName = ""
 
+    // Optional safety allowlist so you don't nuke yourself/Finder/etc.
+    private let allowlist: Set<String> = [
+        Bundle.main.bundleIdentifier ?? "",
+        "com.apple.finder",
+        "com.apple.Terminal"
+    ]
+
     func start(mode: FocusMode) {
-        blockedApps = mode.blockedApps
-        blockedSites = mode.blockedSites
+        blockedApps = mode.blockedApps.subtracting(allowlist) // never block allowlisted
         modeName = mode.name
         startAppBlocking()
-        startWebBlocking()   // defined in section 3
     }
 
     func stop() {
         stopAppBlocking()
-        stopWebBlocking()
     }
 
-    // MARK: Apps
+    // MARK: - Apps
     private func startAppBlocking() {
         let nc = NSWorkspace.shared.notificationCenter
-        appLaunchObserver = nc.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main) { [weak self] n in
+        appLaunchObserver = nc.addObserver(forName: NSWorkspace.didLaunchApplicationNotification,
+                                           object: nil, queue: .main) { [weak self] n in
             self?.handleAppEvent(n)
         }
-        appActivateObserver = nc.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { [weak self] n in
+        appActivateObserver = nc.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
+                                             object: nil, queue: .main) { [weak self] n in
             self?.handleAppEvent(n)
         }
+
+        // Kick off an immediate sweep so already-running background apps get killed now.
+        sweepAllRunning()
+
+        // Keep sweeping periodically (background + frontmost safety belt)
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 500_000_000)
-                await self?.checkFrontmost()
+                try? await Task.sleep(nanoseconds: 700_000_000) // ~0.7s
+                await self?.sweepAllRunning()
             }
         }
     }
@@ -43,58 +54,41 @@ final class FocusEngine: ObservableObject {
         let nc = NSWorkspace.shared.notificationCenter
         if let o = appLaunchObserver { nc.removeObserver(o) }
         if let o = appActivateObserver { nc.removeObserver(o) }
-        appLaunchObserver = nil; appActivateObserver = nil
-        pollTask?.cancel(); pollTask = nil
+        appLaunchObserver = nil
+        appActivateObserver = nil
+        pollTask?.cancel()
+        pollTask = nil
     }
 
     private func handleAppEvent(_ note: Notification) {
         guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bid = app.bundleIdentifier
-        else { return }
-
-        if blockedApps.contains(bid) {
-            app.terminate()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { app.forceTerminate() }
-            Notifier.remindFocusOn(modeName: modeName)
-        }
-    }
-
-    @MainActor private func checkFrontmost() {
-        guard let app = NSWorkspace.shared.frontmostApplication,
               let bid = app.bundleIdentifier else { return }
-        if blockedApps.contains(bid) {
-            app.terminate()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { app.forceTerminate() }
-            Notifier.remindFocusOn(modeName: modeName)
+        if shouldBlock(bid) { kill(app) }
+    }
+
+    /// Sweep EVERYTHING, not just the frontmost app.
+    @MainActor
+    private func sweepAllRunning() {
+        for app in NSWorkspace.shared.runningApplications {
+            guard let bid = app.bundleIdentifier else { continue }
+            if shouldBlock(bid) {
+                kill(app)
+            }
         }
     }
 
-    // MARK: Web (PAC + local proxy)
-    private var pacManager = PACManager()
-    private var proxy: BlockProxy?
-
-    private func startWebBlocking() {
-        // Start a tiny local proxy and point PAC to it
-        let port = 9876
-        proxy = BlockProxy(port: port, isBlockedHost: { [weak self] host in
-            guard let self = self else { return false }
-            return self.matchesBlocked(host)
-        }, onBlockedHit: { [weak self] in
-            guard let self = self else { return }
-            Notifier.remindFocusOn(modeName: self.modeName)
-        })
-        proxy?.start()
-        pacManager.enablePAC(blockedHosts: blockedSites, proxyPort: port)
+    private func shouldBlock(_ bundleID: String) -> Bool {
+        guard !allowlist.contains(bundleID) else { return false }
+        return blockedApps.contains(bundleID)
     }
 
-    private func stopWebBlocking() {
-        proxy?.stop(); proxy = nil
-        pacManager.disablePAC()
-    }
-
-    private func matchesBlocked(_ host: String) -> Bool {
-        // suffix match: example.com blocks foo.example.com too
-        let h = host.lowercased()
-        return blockedSites.contains(where: { d in h == d || h.hasSuffix("." + d) })
+    private func kill(_ app: NSRunningApplication) {
+        // Try a graceful terminate; follow-up with forceTerminate shortly after.
+        app.terminate()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak app, modeName] in
+            guard let app, !app.isTerminated else { return }
+            app.forceTerminate()
+            Notifier.remindFocusOn(modeName: modeName)
+        }
     }
 }
