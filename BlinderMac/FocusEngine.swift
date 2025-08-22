@@ -3,11 +3,17 @@ import AppKit
 
 @MainActor
 final class FocusEngine: ObservableObject {
+    // App blocking functions
     private var appLaunchObserver: Any?
     private var appActivateObserver: Any?
     private var pollTask: Task<Void, Never>?
-
     private var blockedApps = Set<String>()
+
+    // Website blocking functions
+    var blockedSites: Set<String> = []
+    var webAction: WebAction = .navigateToBlank
+    var webPollTask: Task<Void, Never>? = nil
+
     private var modeName = ""
 
     // Just in case we plan to explode ourselves....

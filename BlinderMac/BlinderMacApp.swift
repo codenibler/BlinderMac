@@ -34,6 +34,12 @@ struct BlinderMacApp: App {
                     .background(.thinMaterial)
                     .environmentObject(appState)
                     .environmentObject(focusModel)
+                    .onAppear {
+                        // e.g., in your App struct's first onAppear of the main UI/menu window
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            AutomationOnboarding.shared.requestForInstalledBrowsers()
+                        }
+                    }
             } label: {
                 switch appState.status {
                 // Dynamic icon for focus running and focus missing.
@@ -51,6 +57,7 @@ struct BlinderMacApp: App {
                 }
             }
             .menuBarExtraStyle(.window)
+            
         
         // Separate window for creating a new mode.
         Window("", id: "new-mode") {
@@ -71,5 +78,24 @@ struct BlinderMacApp: App {
         }
         .windowResizability(.contentSize)
         .windowToolbarStyle(.unifiedCompact)
+    }
+}
+
+func sendHarmlessAppleEvent(toBundleID bundleID: String) {
+    let source = """
+    tell application id "\(bundleID)"
+        get name
+    end tell
+    """
+    var err: NSDictionary?
+    if let script = NSAppleScript(source: source) {
+        _ = script.executeAndReturnError(&err)
+        if let e = err {
+            print("Automation AE error to \(bundleID):", e)
+        } else {
+            print("Automation likely granted (or already granted) for \(bundleID).")
+        }
+    } else {
+        print("Failed to compile AppleScript for \(bundleID).")
     }
 }

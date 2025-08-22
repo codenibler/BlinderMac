@@ -107,8 +107,10 @@ struct NewModeWizardView: View {
 
     private func canProceed(_ step: Step) -> Bool {
         switch step {
+        // Can proced with no apps
         case .apps:
-            return !draft.selectedAppBundleIDs.isEmpty
+            return true
+        // Can proceed with no sites
         case .websites:
             return true
         case .confirm:

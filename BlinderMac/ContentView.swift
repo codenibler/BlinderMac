@@ -197,11 +197,15 @@ struct ContentView: View {
     }
 
     // MARK: - Actions
+    //Debug print for website blocking permission
     private func startFocus() {
+        
         if let id = focusModel.selectedModeID,
-               let mode = focusModel.modes.first(where: { $0.id == id }) {
-                engine.start(mode: mode)
-            }
+           let mode = focusModel.modes.first(where: { $0.id == id }) {
+            engine.start(mode: mode) // your app-blocking
+            engine.startWebBlockingAutomation(action: .navigateToBlank, // or .closeTab
+                                              blockedDomains: mode.blockedSites)
+        }
         // Set timer with seconds indicated by user.
         remainingSeconds = durationSeconds
         appState.status = .running
@@ -227,6 +231,7 @@ struct ContentView: View {
     }
     
     private func stopFocus() {
+        engine.stopWebBlockingAutomation()
         engine.stop()
         timerTask?.cancel()
         timerTask = nil
